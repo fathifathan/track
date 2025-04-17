@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelacakan Lokasi</title>
+    <style>
+        #maptarget {
+            height: 400px;
+            width: 100%;
+        }
+        #error-message {
+            color: red;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=6fd48942bf25a6aa28b1e7654e4474db"></script> <!-- Ganti YOUR_API_KEY dengan API Key Anda -->
+</head>
+<body>
+   <h1>Pelacakan Lokasi</h1>
+   <label for="phone-number">Masukkan Nomor Telepon Anda:</label>
+   <input type="text" id="phone-number" placeholder="Contoh: 08123456789">
+   <button id="track-button">Lacak Lokasi</button>
+
+   <p>
+       <span id="latitude"></span><br>
+       <span id="longitude"></span>
+   </p>
+   <p id="error-message"></p> <!-- Tempat untuk menampilkan pesan kesalahan -->
+   <hr>
+   <div id="maptarget"></div>
+
+   <script type="text/javascript">
+        document.getElementById('track-button').addEventListener('click', function() {
+            const phoneNumber = document.getElementById('phone-number').value;
+            if (phoneNumber) {
+                // Jika nomor telepon diisi, lanjutkan untuk mendapatkan lokasi
+                getLocation();
+            } else {
+                document.getElementById('error-message').textContent = "Silakan masukkan nomor telepon.";
+            }
+        });
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const long = position.coords.longitude;
+
+                    // Set value
+                    document.getElementById('latitude').textContent = "Latitude: " + lat;
+                    document.getElementById('longitude').textContent = "Longitude: " + long;
+
+                    // Inisialisasi peta
+                    const mapOptions = {
+                        center: new google.maps.LatLng(lat, long),
+                        zoom: 15,
+                    };
+                    const map = new google.maps.Map(document.getElementById('maptarget'), mapOptions);
+
+                    // Tambahkan marker
+                    const marker = new google.maps.Marker({
+                        position: { lat: lat, lng: long },
+                        map: map,
+                        title: "Lokasi Anda"
+                    });
+                }, function(error) {
+                    handleLocationError(error);
+                });
+            } else {
+                // Browser tidak mendukung geolocation
+                document.getElementById('error-message').textContent = "Geolocation tidak didukung oleh browser ini.";
+            }
+        }
+
+        function handleLocationError(error) {
+            const errorMessage = document.getElementById('error-message');
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage.textContent = "Pengguna menolak permintaan lokasi.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage.textContent = "Lokasi tidak tersedia.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage.textContent = "Permintaan lokasi telah timeout.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorMessage.textContent = "Terjadi kesalahan yang tidak diketahui.";
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
